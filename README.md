@@ -59,8 +59,8 @@ End of assembler dump.
    0x08048836 <+51>:    call   0x8048610 <_ZStlsISt11char_traitsIcEERSt13basic_ostreamIcT_ES5_PKc@plt>
    0x0804883b <+56>:    add    esp,0x10
 ```
-^ Pushing the string ("Password: \n") to the stack before calling to an ostream function (printf).  
-Simply passing it as an argument to the function; according to _cdecl_ calling convention
+Pushing the string ("Password: \n") to the stack before calling to an ostream function (printf).  
+Simply passing it as an argument to the function; according to _cdecl_ calling convention.
 ```assembly
    0x0804883e <+59>:    sub    esp,0x8
    0x08048841 <+62>:    lea    eax,[ebp-0x28]
@@ -69,15 +69,15 @@ Simply passing it as an argument to the function; according to _cdecl_ calling c
    0x0804884a <+71>:    call   0x8048620 <_ZStrsIcSt11char_traitsIcEERSt13basic_istreamIT_T0_ES6_PS3_@plt>
    0x0804884f <+76>:    add    esp,0x10
 ```
-^ calling istream function that gets our input and puts it into eax (which points to address on the stack)  
+Calling istream function that gets our input and puts it into eax (which points to an address on the stack).
 ```assembly
    0x08048858 <+85>:    push   eax
    0x08048859 <+86>:    call   0x804876b <_Z5loginPc>
    0x0804885e <+91>:    add    esp,0x10
 ```
-^ Calling **login** function with eax as parameter
+Calling _login_ function with eax as parameter.
 
-Lets disass login():
+Lets disass _login_:
 ```assembly
 Dump of assembler code for function _Z5loginPc:
    0x0804876b <+0>:     push   ebp
@@ -122,7 +122,8 @@ Dump of assembler code for function _Z5loginPc:
    0x08048802 <+151>:   ret
 End of assembler dump.
 ```
-We know that the login function got our input as a parameter and is determing if our password is correct or not.  
+</br>We know that the login function got our input as a parameter and is determining if your password is correct or not.  
+Lets zoom-in into an interesting part in the assembly.  
 ```assembly
    0x08048789 <+30>:    push   0x80489c9
    0x0804878e <+35>:    push   DWORD PTR [ebp+0x8]
