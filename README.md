@@ -1,5 +1,148 @@
 # buffer-overflow-exercises
 A collection of buffer-overflow based challenges from advanced-cyber course in College Of Managment
+
+## 2nd challenge
+### Goal: get the correct password  
+
+*Disclaimer: the password is seen straightaway with ghidra. I did it using debugging the assembly in order to learn and have fun.  
+</br>After a run with a random password we see that we're entering the wrong password.
+```
+$ ./two
+Password: testpassword
+You shall not pass, BYE!
+```
+Lets see what happens behind the scenes:
+```
+$ gdb two
+(gdb) disass main
+```
+```assembly
+Dump of assembler code for function main:
+   0x08048803 <+0>:     lea    ecx,[esp+0x4]
+   0x08048807 <+4>:     and    esp,0xfffffff0
+   0x0804880a <+7>:     push   DWORD PTR [ecx-0x4]
+   0x0804880d <+10>:    push   ebp
+   0x0804880e <+11>:    mov    ebp,esp
+   0x08048810 <+13>:    push   ecx
+   0x08048811 <+14>:    sub    esp,0x24
+   0x08048814 <+17>:    mov    DWORD PTR [ebp-0xc],0x8048ab7
+   0x0804881b <+24>:    mov    DWORD PTR [ebp-0x10],0x8048ad4
+   0x08048822 <+31>:    mov    DWORD PTR [ebp-0x14],0x8048aee
+   0x08048829 <+38>:    sub    esp,0x8
+   0x0804882c <+41>:    push   0x8048b0a
+   0x08048831 <+46>:    push   0x804a100
+   0x08048836 <+51>:    call   0x8048610 <_ZStlsISt11char_traitsIcEERSt13basic_ostreamIcT_ES5_PKc@plt>
+   0x0804883b <+56>:    add    esp,0x10
+   0x0804883e <+59>:    sub    esp,0x8
+   0x08048841 <+62>:    lea    eax,[ebp-0x28]
+   0x08048844 <+65>:    push   eax
+   0x08048845 <+66>:    push   0x804a060
+   0x0804884a <+71>:    call   0x8048620 <_ZStrsIcSt11char_traitsIcEERSt13basic_istreamIT_T0_ES6_PS3_@plt>
+   0x0804884f <+76>:    add    esp,0x10
+   0x08048852 <+79>:    sub    esp,0xc
+   0x08048855 <+82>:    lea    eax,[ebp-0x28]
+   0x08048858 <+85>:    push   eax
+   0x08048859 <+86>:    call   0x804876b <_Z5loginPc>
+   0x0804885e <+91>:    add    esp,0x10
+   0x08048861 <+94>:    mov    eax,0x0
+   0x08048866 <+99>:    mov    ecx,DWORD PTR [ebp-0x4]
+   0x08048869 <+102>:   leave
+   0x0804886a <+103>:   lea    esp,[ecx-0x4]
+   0x0804886d <+106>:   ret
+End of assembler dump.
+```
+We can break this long code into three main parts.
+```assembly
+   0x0804882c <+41>:    push   0x8048b0a
+   0x08048831 <+46>:    push   0x804a100
+   0x08048836 <+51>:    call   0x8048610 <_ZStlsISt11char_traitsIcEERSt13basic_ostreamIcT_ES5_PKc@plt>
+   0x0804883b <+56>:    add    esp,0x10
+```
+^ Pushing the string ("Password: \n") to the stack before calling to an ostream function (printf)
+```assembly
+   0x0804883e <+59>:    sub    esp,0x8
+   0x08048841 <+62>:    lea    eax,[ebp-0x28]
+   0x08048844 <+65>:    push   eax
+   0x08048845 <+66>:    push   0x804a060
+   0x0804884a <+71>:    call   0x8048620 <_ZStrsIcSt11char_traitsIcEERSt13basic_istreamIT_T0_ES6_PS3_@plt>
+   0x0804884f <+76>:    add    esp,0x10
+```
+^ calling istream function that gets our input and put it into eax(which points to address on the stack)  
+```assembly
+   0x08048858 <+85>:    push   eax
+   0x08048859 <+86>:    call   0x804876b <_Z5loginPc>
+   0x0804885e <+91>:    add    esp,0x10
+```
+^ Calling **login** function with eax as parameter
+
+Lets disass login():
+```assembly
+Dump of assembler code for function _Z5loginPc:
+   0x0804876b <+0>:     push   ebp
+   0x0804876c <+1>:     mov    ebp,esp
+   0x0804876e <+3>:     sub    esp,0x28
+   0x08048771 <+6>:     mov    DWORD PTR [ebp-0xc],0x8048997
+   0x08048778 <+13>:    mov    DWORD PTR [ebp-0x10],0x80489aa
+   0x0804877f <+20>:    mov    DWORD PTR [ebp-0x14],0x80489c1
+   0x08048786 <+27>:    sub    esp,0x8
+   0x08048789 <+30>:    push   0x80489c9
+   0x0804878e <+35>:    push   DWORD PTR [ebp+0x8]
+   0x08048791 <+38>:    call   0x8048650 <strcmp@plt>
+   0x08048796 <+43>:    add    esp,0x10
+   0x08048799 <+46>:    test   eax,eax
+   0x0804879b <+48>:    jne    0x80487da <_Z5loginPc+111>
+   0x0804879d <+50>:    sub    esp,0x8
+   0x080487a0 <+53>:    push   0x80489db
+   0x080487a5 <+58>:    push   0x804a100
+   0x080487aa <+63>:    call   0x8048610 <_ZStlsISt11char_traitsIcEERSt13basic_ostreamIcT_ES5_PKc@plt>
+   0x080487af <+68>:    add    esp,0x10
+   0x080487b2 <+71>:    sub    esp,0x8
+   0x080487b5 <+74>:    push   0x8048640
+   0x080487ba <+79>:    push   eax
+   0x080487bb <+80>:    call   0x8048630 <_ZNSolsEPFRSoS_E@plt>
+   0x080487c0 <+85>:    add    esp,0x10
+   0x080487c3 <+88>:    mov    DWORD PTR [ebp-0x18],0x80489e3
+   0x080487ca <+95>:    mov    DWORD PTR [ebp-0x1c],0x8048a01
+   0x080487d1 <+102>:   mov    DWORD PTR [ebp-0x20],0x8048a12
+   0x080487d8 <+109>:   jmp    0x8048800 <_Z5loginPc+149>
+   0x080487da <+111>:   sub    esp,0x8
+   0x080487dd <+114>:   push   0x8048a30
+   0x080487e2 <+119>:   push   0x804a100
+   0x080487e7 <+124>:   call   0x8048610 <_ZStlsISt11char_traitsIcEERSt13basic_ostreamIcT_ES5_PKc@plt>
+   0x080487ec <+129>:   add    esp,0x10
+   0x080487ef <+132>:   sub    esp,0x8
+   0x080487f2 <+135>:   push   0x8048640
+   0x080487f7 <+140>:   push   eax
+   0x080487f8 <+141>:   call   0x8048630 <_ZNSolsEPFRSoS_E@plt>
+   0x080487fd <+146>:   add    esp,0x10
+   0x08048800 <+149>:   nop
+   0x08048801 <+150>:   leave
+   0x08048802 <+151>:   ret
+End of assembler dump.
+```
+We know that the login function got our input as a parameter and is determing if our password is correct or not.  
+```assembly
+   0x08048789 <+30>:    push   0x80489c9
+   0x0804878e <+35>:    push   DWORD PTR [ebp+0x8]
+   0x08048791 <+38>:    call   0x8048650 <strcmp@plt>
+```
+There is a call to strcmp that takes two parameters.
+ 1. A static string stored at **0x80489c9**.
+ 2. And a second string that is stored on the stack(our input password).
+
+Lets examine the static string:  
+```
+(gdb)x/s 0x80489c9
+
+0x80489c9:      "whatarethechances"
+```
+**Yahoo!! we got the password**
+```
+$ ./two 
+Password: whatarethechances
+Welcome
+```
+**Success!!**</br>
 ## 3rd challenge
 ### Goal: make the binary print "drink coffee"  
 
@@ -37,7 +180,7 @@ Dump of assembler code for function main:
    0x080486f4 <+76>:    ret
 End of assembler dump.
 ```
-</br>Our target is to execute only the “drink coffee” print without the “Do not” print.
+</br>Our target is to execute only the “drink coffee” print without the “Do not” print.  
 After a brief look on the assembly code we can see that there are two prints: **<+35>** and **<+56>**  
 There is no jump or compare before any of them so we need to think of a way to tamper with the execution flow.
 
