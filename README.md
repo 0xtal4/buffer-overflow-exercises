@@ -54,7 +54,7 @@ End of assembler dump.
 </br>This 32bit binary is using _CDECl_ calling convenction.  
 we'll not dive into it but the thing relevant to us in this calling convention is that
 in _CDECL_ function's arguments are **pushed onto the stack**  
-We can break this long code into three main parts.</br>
+</br>We can break this long code into three main parts.</br>
 ```assembly
    0x0804882c <+41>:    push   0x8048b0a
    0x08048831 <+46>:    push   0x804a100
