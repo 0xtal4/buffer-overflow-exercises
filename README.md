@@ -51,14 +51,18 @@ Dump of assembler code for function main:
    0x0804886d <+106>:   ret
 End of assembler dump.
 ```
-We can break this long code into three main parts.
+</br>This 32bit binary is using _CDECl_ calling convenction.  
+we'll not dive into it but the thing relevant to us in this calling convention is that
+in _CDECL_ function's arguments are **pushed onto the stack**  
+We can break this long code into three main parts.</br>
 ```assembly
    0x0804882c <+41>:    push   0x8048b0a
    0x08048831 <+46>:    push   0x804a100
    0x08048836 <+51>:    call   0x8048610 <_ZStlsISt11char_traitsIcEERSt13basic_ostreamIcT_ES5_PKc@plt>
    0x0804883b <+56>:    add    esp,0x10
 ```
-^ Pushing the string ("Password: \n") to the stack before calling to an ostream function (printf)
+^ Pushing the string ("Password: \n") to the stack before calling to an ostream function (printf).  
+Simply passing it as an argument to the function; according to _cdecl_ calling convention
 ```assembly
    0x0804883e <+59>:    sub    esp,0x8
    0x08048841 <+62>:    lea    eax,[ebp-0x28]
@@ -67,7 +71,7 @@ We can break this long code into three main parts.
    0x0804884a <+71>:    call   0x8048620 <_ZStrsIcSt11char_traitsIcEERSt13basic_istreamIT_T0_ES6_PS3_@plt>
    0x0804884f <+76>:    add    esp,0x10
 ```
-^ calling istream function that gets our input and put it into eax(which points to address on the stack)  
+^ calling istream function that gets our input and puts it into eax (which points to address on the stack)  
 ```assembly
    0x08048858 <+85>:    push   eax
    0x08048859 <+86>:    call   0x804876b <_Z5loginPc>
@@ -126,7 +130,7 @@ We know that the login function got our input as a parameter and is determing if
    0x0804878e <+35>:    push   DWORD PTR [ebp+0x8]
    0x08048791 <+38>:    call   0x8048650 <strcmp@plt>
 ```
-There is a call to strcmp that takes two parameters.
+There is a call to _strcmp_ that takes two parameters.
  1. A static string stored at **0x80489c9**.
  2. And a second string that is stored on the stack(our input password).
 
