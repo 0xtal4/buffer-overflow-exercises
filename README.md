@@ -1,6 +1,6 @@
 # buffer-overflow-exercises
 A collection of buffer-overflow based challenges from advanced-cyber course in College Of Managment
-## 3rd task
+## 3rd challenge
 ### Goal: make the binary print "drink coffee"  
 
 First we run the binary:
@@ -127,7 +127,7 @@ drink coffee[Inferior 1 (process 28524) exited normally]
 
 Success! “drink coffee” is printed!
 </bar>
-## 4th task
+## 4th challenge
 ### Goal: make the binary print "Welcome"</br>
 
 Let’s disassemble main
@@ -255,7 +255,7 @@ Welcome
 ```
 **Success!!**
 </br>
-## 5th task
+## 5th challenge
 ### Goal: inject and run shellcode by exploiting buffer overflow
 ```bash
 $ checksec five                          
