@@ -1,6 +1,6 @@
 # buffer-overflow-exercises
 A collection of buffer-overflow based challenges from advanced-cyber course in College Of Managment
-## 3th task
+## 3rd task
 ### Goal: make the binary print "drink coffee"  
 
 First we run the binary:
