@@ -73,7 +73,7 @@ So, after inspecting the stack we can assume it looks like this:
 
 ```
 top of the stack                                             bottom of stack
-<------ [            buf[24]            ] [ ebp  ] [  ret  ]
+<------ [            buf[24]            ] [  ebp[4]  ] [  ret[4]  ]
 bottom of memory                                             top of memory
 ```
 
