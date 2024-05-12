@@ -51,7 +51,7 @@ Dump of assembler code for function main:
    0x0804886d <+106>:   ret
 End of assembler dump.
 ```
-</br>This 32-bit binary utilizes the _cdecl_ calling convention, where function arguments are pushed onto the stack.
+</br>This 32-bit binary utilizes the _cdecl_ calling convention, where function arguments are pushed onto the stack.  
 </br>We can break this long code into three main parts.</br>
 ```assembly
    0x0804882c <+41>:    push   0x8048b0a
