@@ -53,14 +53,17 @@ End of assembler dump.
 ```
 </br>This 32-bit binary utilizes the _cdecl_ calling convention, where function arguments are pushed onto the stack.  
 </br>We can break this long code into three main parts.</br>
+### Part 1:  
+Pushing the string ("Password: \n") to the stack before calling to an ostream function (printf).  
+Simply passing it as an argument to the function; according to _cdecl_ calling convention.
 ```assembly
    0x0804882c <+41>:    push   0x8048b0a
    0x08048831 <+46>:    push   0x804a100
    0x08048836 <+51>:    call   0x8048610 <_ZStlsISt11char_traitsIcEERSt13basic_ostreamIcT_ES5_PKc@plt>
    0x0804883b <+56>:    add    esp,0x10
 ```
-Pushing the string ("Password: \n") to the stack before calling to an ostream function (printf).  
-Simply passing it as an argument to the function; according to _cdecl_ calling convention.
+### Part 2:  
+Calling istream function that gets our input and puts it into eax (which points to an address on the stack).
 ```assembly
    0x0804883e <+59>:    sub    esp,0x8
    0x08048841 <+62>:    lea    eax,[ebp-0x28]
@@ -69,13 +72,13 @@ Simply passing it as an argument to the function; according to _cdecl_ calling c
    0x0804884a <+71>:    call   0x8048620 <_ZStrsIcSt11char_traitsIcEERSt13basic_istreamIT_T0_ES6_PS3_@plt>
    0x0804884f <+76>:    add    esp,0x10
 ```
-Calling istream function that gets our input and puts it into eax (which points to an address on the stack).
+### Part 3:  
+Calling _login_ function with eax as parameter.
 ```assembly
    0x08048858 <+85>:    push   eax
    0x08048859 <+86>:    call   0x804876b <_Z5loginPc>
    0x0804885e <+91>:    add    esp,0x10
 ```
-Calling _login_ function with eax as parameter.
 
 Lets disass _login_:
 ```assembly
